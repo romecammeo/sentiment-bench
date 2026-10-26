@@ -1,0 +1,20 @@
+# Initial dependency plan, NOT a lockfile.
+# Verify compatibility on the development machine before installing all packages.
+# Pin tested versions for reproducibility before final submission.
+
+# Dataset handling and model evaluation
+pandas
+scikit-learn
+datasets
+
+# Inference and LoRA training
+torch
+transformers
+peft
+accelerate
+
+# Similar-review retrieval
+sentence-transformers
+
+# Simple user interface
+streamlit
