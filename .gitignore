@@ -1,0 +1,28 @@
+# Local Python environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets and local Streamlit credentials
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Downloaded data and model caches / checkpoints
+data/raw/
+data/processed/
+checkpoints/
+models/
+.cache/
+
+# OS / editor debris
+.DS_Store
+.vscode/
+.idea/
+
+# Scratch output; small summarized metrics can go in a committed reports/ directory
+outputs/
