@@ -1,53 +1,144 @@
 # SentimentBench
 
-**Customer-review sentiment classification: fine-tuning, evaluation, and error analysis**
+**Sentiment classification, LoRA adaptation, semantic retrieval, and customer-support drafting**
 
-A small hackathon project investigating how a pretrained sentiment classifier behaves before and after parameter-efficient (LoRA) fine-tuning on customer reviews. It also retrieves similar reviews and generates a short contextual reply in a minimal Streamlit application.
+SentimentBench is a small Python / Streamlit hackathon project exploring a practical ML question: **does parameter-efficient fine-tuning improve binary sentiment classification on held-out customer reviews, and what kinds of errors change?**
 
-## Research question
+It also demonstrates a separate workflow that retrieves similar historical-style product feedback and uses an instruction-tuned language model to draft a customer-support response **for human review**.
 
-Does LoRA fine-tuning improve sentiment-classification performance on held-out customer reviews, and which errors remain or change?
+## Architecture
 
-## Instructor-required deliverables
+| Component | Model / library | Responsibility |
+| --- | --- | --- |
+| Sentiment baseline | DistilBERT SST-2 checkpoint via Hugging Face Transformers | Predict positive or negative sentiment |
+| Fine-tuning | PEFT LoRA + Transformers Trainer | Train adapters and classifier head on labelled Yelp reviews |
+| Evaluation | scikit-learn | Compare both classifiers on identical held-out examples |
+| Semantic retrieval | Sentence Transformers MiniLM | Find similar product-review text |
+| Reply drafting | Qwen2.5-0.5B-Instruct | Produce a draft reply from a complaint and retrieved material |
+| Interface | Streamlit | Display classifier outputs, retrieved records, and editable draft |
 
-- [ ] Run a pretrained sentiment classifier and record baseline predictions.
-- [ ] Fine-tune with LoRA using a separate training split.
-- [ ] Evaluate both versions on **the same held-out reviews**.
-- [ ] Report accuracy, precision, recall, and inference latency.
-- [ ] Compare misclassified examples before and after fine-tuning.
-- [ ] Retrieve similar reviews and generate a short reply using retrieved context.
-- [ ] Build a small Streamlit page.
-- [ ] Document how to reproduce the experiment and record a two-minute demo.
+**Do not conflate these model functions:** the sentiment classifier does not generate replies, and the generator is not the LoRA-fine-tuned sentiment classifier.
 
-## Implementation sequence
+## Observed baseline-versus-LoRA results
 
-1. **Baseline:** get a small dataset into Python, load a model, make predictions.
-2. **Evaluation:** implement metrics and a before/after comparison format.
-3. **Adaptation:** fine-tune with LoRA and evaluate on the unchanged held-out examples.
-4. **Retrieval + reply:** retrieve similar reviews and construct a short context-aware response.
-5. **UI + submission:** build Streamlit, check failure cases, document and demonstrate.
+One small local experiment (reported October 26, 2026):
 
-## Proposed layout
+| Metric | Pretrained classifier | LoRA-adapted classifier |
+| --- | ---: | ---: |
+| Accuracy on 200 held-out Yelp reviews | 87.5% | 90.0% |
+| Negative-class precision | 85.58% | 90.72% |
+| Negative-class recall | 89.90% | 88.89% |
+| Average CPU inference latency per review | 24.40 ms | 25.13 ms |
 
+LoRA corrected 6 previously wrong predictions and introduced 1 new error on this set. Accuracy rose **2.5 percentage points**, while recall for genuinely negative reviews **fell slightly**. This is a measured result for this sample, **not a general claim that fine-tuning always improves performance**.
+
+The model was adapted with 512 Yelp training examples, evaluated during training with 128 validation examples, and compared on a separate 200-review test subset. The experiment used one epoch and a 128-token input limit. The original model had already been trained for sentiment classification before this experiment.
+
+See [the full experiment record](docs/results_2026-10-26.md) and [experiment protocol](docs/experiment_protocol.md).
+
+## Review datasets and data ethics
+
+**Quantitative evaluation:** [Yelp Polarity](https://huggingface.co/datasets/fancyzhx/yelp_polarity) provides the labelled train/test examples.
+
+**Business case study:** A historical log from **May 2026** contained **19 reviews from a product the developer previously sold** (Sunboard). These 19 are a *historical sample*, **not the total number of reviews the product received**. They are used for exploratory retrieval and qualitative analysis, **not** for the reported Yelp fine-tuning or accuracy metrics.
+
+The extracted third-party review text is kept locally in `data/raw/sunboard_reviews_anonymized.csv`; `data/raw/` is Git-ignored and is **not distributed in the repository**. Removing names from the text alone does not eliminate all reidentification or redistribution concerns.
+
+The public demo instead includes `data/demo_reviews.csv` with **clearly synthetic reviews**. When the private CSV exists, the loader uses it; otherwise it falls back to the synthetic dataset. Both inputs follow the same schema: `review_id, variant, stars, title, review_text`.
+
+## Quick start
+
+These commands are intended to be run from the **repository root**. The working development environment was macOS Apple Silicon with Python 3.14.6; other setups may need dependency adjustments.
+
+```bash
+git clone https://github.com/romecammeo/sentiment-bench.git
+cd sentiment-bench
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
+
+### 1. Get a working baseline
+
+```bash
+python src/baseline.py
+python src/evaluate.py
+```
+
+The evaluation script first measures the pretrained sentiment classifier on an exploratory test subset.
+
+### 2. Recreate the local LoRA adapter
+
+The adapter files are generated by training and are **not checked into Git**.
+
+```bash
+python src/train_lora.py
+```
+
+This writes `models/sentiment-lora/adapter_config.json` and `adapter_model.safetensors`, plus tokenizer files. Training uses the Yelp training split, not the final held-out examples.
+
+Then compare the original classifier and saved adaptation on the **same** 200 evaluation reviews:
+
+```bash
+python src/compare_models.py
+```
+
+A new training run may produce different numbers; record versions, random seeds, and hardware. Running the Streamlit page **before** generating the adapter will fail to load it.
+
+### 3. Test retrieval and text generation
+
+```bash
+python src/retrieve.py
+python src/generate_reply.py
+```
+
+With no private CSV, the retrieval script uses the **synthetic** sample in `data/demo_reviews.csv`. These scripts may download additional pretrained models from Hugging Face.
+
+### 4. Run the interface
+
+```bash
+python -m streamlit run src/app.py
+```
+
+Open the local address shown in your terminal (typically `http://localhost:8501`). The page displays both classifiers' predictions, three similar review matches, and a generated draft. Stop the local server with **Control+C** in the terminal where it is running.
+
+## Repository structure
+
+```text
 sentiment-bench/
-  README.md
-  .gitignore
-  requirements.txt
-  docs/experiment_protocol.md
-  src/            # create modules as we implement them
-  tests/          # add focused tests with implementation
-  app.py          # Streamlit interface, later
+├── README.md
+├── requirements.txt
+├── docs/
+│   ├── experiment_protocol.md
+│   ├── results_2026-10-26.md
+│   ├── presentation_sheet.md
+│   └── submission_plan.md
+├── data/
+│   ├── demo_reviews.csv              # synthetic, public
+│   └── raw/                          # private, ignored by Git
+├── models/                           # generated adapters, ignored by Git
+└── src/
+    ├── app.py
+    ├── baseline.py
+    ├── compare_models.py
+    ├── evaluate.py
+    ├── generate_reply.py
+    ├── retrieve.py
+    ├── sunboard_data.py
+    └── train_lora.py
 ```
 
-Only the setup documents are supplied initially; the application code will be built incrementally during the hackathon.
+## Limitations and responsible use
 
-## Reproducibility and responsible claims
+- Yelp rating-derived labels are not a perfect representation of aspect-specific or ambiguous sentiment.
+- The 200-review sample is small; precision, recall and latency results require more extensive evaluation before making general claims.
+- Retrieved text can be semantically similar yet **contradict** the customer's complaint. A high similarity score is not a probability of factual correctness.
+- Long reviews may be truncated by the embedding model, classifier, or generation prompt.
+- A coherent draft is not evidence that the generator used retrieved reviews faithfully. **Every generated reply requires human review**; do not send automatically.
+- The private dataset and model adapter are intentionally not redistributed. Fresh clones require the documented training step and use synthetic demo reviews.
 
-Training, validation, and test data must be kept separate. The pretrained and fine-tuned classifiers will be scored on the **same untouched evaluation split**. Record the model and dataset identifiers, sample sizes, random seed, package versions, training settings, and hardware before reporting results. Do not claim that fine-tuning improves performance until the measured results support it.
+## Presentation and submission
 
-The full protocol is in [`docs/experiment_protocol.md`](docs/experiment_protocol.md).
+See [the two-minute presentation and articulation sheet](docs/presentation_sheet.md) and [the submission checklist](docs/submission_plan.md).
 
-## Status
-
-Repository preparation only. No trained model, evaluation results, or working app are claimed yet.
+Built for the October 2026 Developers Institute hackathon. This is a focused learning and evaluation prototype, **not a production customer-support system**.
