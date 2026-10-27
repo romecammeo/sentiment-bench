@@ -15,7 +15,11 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 
 def load_reviews():
-    with DATA_PATH.open(encoding="utf-8-sig", newline="") as file:
+    demo_path = DATA_PATH.parent.parent / "demo_reviews.csv"
+
+    path = DATA_PATH if DATA_PATH.exists() else demo_path
+
+    with path.open(encoding="utf-8-sig", newline="") as file:
         return list(csv.DictReader(file))
 
 
