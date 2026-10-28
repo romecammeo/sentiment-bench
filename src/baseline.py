@@ -26,6 +26,7 @@ predictions = []
 for result in results:
     predictions.append(result["label"])
 
-    
-    print(predictions)
+
+
+print(predictions)
 print(len(predictions))
