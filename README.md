@@ -1,10 +1,16 @@
 # SentimentBench
 
-**Sentiment classification, LoRA adaptation, semantic retrieval, and customer-support drafting**
+**Applied AI for customer feedback | LoRA sentiment benchmarking, semantic retrieval, and response drafting**
 
-SentimentBench is a small Python / Streamlit hackathon project exploring a practical ML question: **does parameter-efficient fine-tuning improve binary sentiment classification on held-out customer reviews, and what kinds of errors change?**
+SentimentBench grew out of **my experience operating an Amazon e-commerce business selling Sunboard**, an unconventional **wearable backrest**. Its distinctive form factor invited differing customer expectations and feedback about aspects such as comfort, support, and stability. That made the reviews an interesting starting point for exploring what a simple positive-or-negative sentiment label might miss.
 
-It also demonstrates a separate workflow that retrieves similar historical-style product feedback and uses an instruction-tuned language model to draft a customer-support response **for human review**.
+## Business context and project approach
+
+I selected a small sample of **19 historical Sunboard customer reviews** from a larger **May 2026 Amazon review log** to explore **semantic retrieval** and **AI-assisted customer-support drafts**. Customer-identifying details were removed from the working extract; the original review text stays local, while the public repository uses synthetic reviews for its demo.
+
+Separately, I benchmarked a pretrained DistilBERT sentiment classifier against a **LoRA-adapted** version on labelled **Yelp Polarity** reviews, measuring accuracy, precision, recall, latency, and changes in individual errors. **The Yelp classification results do not measure performance on Sunboard reviews or validate the drafted replies.**
+
+Built during the October 2026 Developers Institute hackathon, this is a learning and evaluation prototype, **not a deployed customer-support system**.
 
 ## Architecture
 
@@ -38,9 +44,9 @@ See [the full experiment record](docs/results_2026-10-26.md) and [experiment pro
 
 **Quantitative evaluation:** [Yelp Polarity](https://huggingface.co/datasets/fancyzhx/yelp_polarity) provides the labelled train/test examples.
 
-**Business case study:** For a separate retrieval demonstration, I used a **May 2026 Amazon reviews log** containing a sample of **19 reviews** of Sunboard, a product I previously sold. This is a sample, not the product's complete review history. The reviews were **not** used for Yelp fine-tuning or the reported classification metrics.
+**Sunboard case study (retrieval and reply drafting):** The 19 reviews are a **selected sample**, not the product's complete review history, and were not used to train or evaluate the Yelp sentiment classifier.
 
-The extracted third-party review text is kept locally in `data/raw/sunboard_reviews_anonymized.csv`; `data/raw/` is Git-ignored and is **not distributed in the repository**. Removing names from the text alone does not eliminate all reidentification or redistribution concerns.
+Customer-identifying details were removed from the local working extract, but this does **not** establish that the remaining text is fully anonymous or that third-party review text can be freely redistributed. The file is kept at `data/raw/sunboard_reviews_anonymized.csv`; `data/raw/` is Git-ignored and **not distributed in the repository**.
 
 The public demo instead includes `data/demo_reviews.csv` with **clearly synthetic reviews**. When the private CSV exists, the loader uses it; otherwise it falls back to the synthetic dataset. Both inputs follow the same schema: `review_id, variant, stars, title, review_text`.
 
@@ -133,6 +139,3 @@ sentiment-bench/
 - A coherent draft is not evidence that the generator used retrieved reviews faithfully. **Every generated reply requires human review**; do not send automatically.
 - The private dataset and model adapter are intentionally not redistributed. Fresh clones require the documented training step and use synthetic demo reviews.
 
-## Scope
-
-Built for the October 2026 Developers Institute hackathon. SentimentBench is an experimental prototype, **not a production customer-support system**.
