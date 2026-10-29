@@ -38,7 +38,7 @@ See [the full experiment record](docs/results_2026-10-26.md) and [experiment pro
 
 **Quantitative evaluation:** [Yelp Polarity](https://huggingface.co/datasets/fancyzhx/yelp_polarity) provides the labelled train/test examples.
 
-**Business case study:** A historical log from **May 2026** contained **19 reviews of Sunboard, a product previously sold by the project owner**. These 19 are a *historical sample*, **not the total number of reviews the product received**. They are used for exploratory retrieval and qualitative analysis, **not** for the reported Yelp fine-tuning or accuracy metrics.
+**Business case study:** For a separate retrieval demonstration, I used a **May 2026 Amazon reviews log** containing a sample of **19 reviews** of Sunboard, a product I previously sold. This is a sample, not the product's complete review history. The reviews were **not** used for Yelp fine-tuning or the reported classification metrics.
 
 The extracted third-party review text is kept locally in `data/raw/sunboard_reviews_anonymized.csv`; `data/raw/` is Git-ignored and is **not distributed in the repository**. Removing names from the text alone does not eliminate all reidentification or redistribution concerns.
 
@@ -133,8 +133,6 @@ sentiment-bench/
 - A coherent draft is not evidence that the generator used retrieved reviews faithfully. **Every generated reply requires human review**; do not send automatically.
 - The private dataset and model adapter are intentionally not redistributed. Fresh clones require the documented training step and use synthetic demo reviews.
 
-## Project authorship and scope
+## Scope
 
-Developed as a personal October 2026 Developers Institute hackathon project by the repository owner, [@romecammeo](https://github.com/romecammeo). The owner chose the project direction, provided the historical product context, ran and debugged the local experiments, evaluated their outputs, and presented the work. **ChatGPT was used extensively for implementation assistance, code generation, debugging, and drafting documentation.** This acknowledgement distinguishes project ownership from authorship of individual lines of code.
-
-This is a learning and evaluation prototype, **not a production customer-support system**.
+Built for the October 2026 Developers Institute hackathon. SentimentBench is an experimental prototype, **not a production customer-support system**.
