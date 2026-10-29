@@ -1,6 +1,6 @@
-# SentimentBench — experiment protocol (pre-implementation)
+# SentimentBench — initial experiment protocol
 
-This file specifies the comparison in advance. It is **a plan**, not a record of experiments already completed.
+This document preserves the initial evaluation plan. See the [experiment record](results_2026-10-26.md) for the implemented configuration, measured results, and limitations.
 
 ## 1. Question and scope
 
@@ -43,7 +43,7 @@ Optional linguistic hypotheses to inspect: negation, contrast, mixed or aspect-s
 
 On user input, retrieve similar reviews (for example, using sentence embeddings and cosine similarity on a modest reference corpus). Display which reviews were retrieved. Use a distinct text-generation component to draft a short reply grounded in the retrieved material. Sentiment classification, similarity search, and generation are separate operations and should not be treated as interchangeable.
 
-## 6. Reproducibility record (fill during work)
+## 6. Reproducibility fields specified in the initial plan
 
 - Dataset and license/source:
 - Number of train / validation / evaluation examples:
@@ -56,9 +56,3 @@ On user input, retrieve similar reviews (for example, using sentence embeddings 
 - Evaluation code / command:
 - Results and limitations:
 
-## 7. Submission checklist
-
-- Source code and README in GitHub; use a development branch.
-- Instructor `zivuch` invited as collaborator through repository settings.
-- Streamlit demo explains baseline, adaptation, metrics, retrieval, reply, and a limitation.
-- Two-minute screen recording and Octopus submission by **Wednesday, 28 October 2026, 09:00** (local course time).
