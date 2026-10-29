@@ -1,6 +1,6 @@
 # SentimentBench — initial experiment protocol
 
-This document preserves the initial evaluation plan. See the [experiment record](results_2026-10-26.md) for the implemented configuration, measured results, and limitations.
+This document preserves the **initial evaluation plan**, rather than retroactively rewriting it around the final project narrative. For the Amazon/Sunboard business motivation, see the [README](../README.md); for the implemented configuration, measured results, and case-study findings, see the [experiment record](results_2026-10-26.md).
 
 ## 1. Question and scope
 
